@@ -18,8 +18,24 @@ document.querySelectorAll('.marq .track').forEach(t=>{t.innerHTML+=t.innerHTML})
 document.querySelectorAll('.rcar').forEach(c=>{const tr=c.querySelector('.rt'),n=tr.children.length,nav=c.nextElementSibling;let i=0;const per=()=>innerWidth<560?1:innerWidth<900?2:3;const pages=()=>Math.max(1,n-per()+1);const go=k=>{i=(k+pages())%pages();tr.style.transform=`translateX(-${i*100/per()}%)`;if(nav)nav.innerHTML=[...Array(pages())].map((_,j)=>`<b class="${j===i?'on':''}"></b>`).join('');nav&&[...nav.children].forEach((b,j)=>b.onclick=()=>go(j))};go(0);setInterval(()=>go(i+1),4500);addEventListener('resize',()=>go(0))});
 document.querySelectorAll('.gal a').forEach(a=>a.addEventListener('click',ev=>{ev.preventDefault();const b=document.createElement('div');b.className='lb';b.style.display='flex';b.innerHTML='<img src="'+a.getAttribute('href')+'">';b.onclick=()=>b.remove();document.body.appendChild(b)}));
 document.querySelectorAll('.filter button').forEach(bt=>bt.addEventListener('click',()=>{document.querySelectorAll('.filter button').forEach(x=>x.classList.remove('on'));bt.classList.add('on');const k=bt.dataset.k;document.querySelectorAll('[data-kind]').forEach(c=>c.style.display=(k==='all'||c.dataset.kind===k)?'':'none')}));
-// 문의 → 이메일(FormSubmit). 실패하면 문자 창
-const f=document.querySelector('form.q');if(f){f.addEventListener('submit',async ev=>{ev.preventDefault();const fd=new FormData(f);const o=Object.fromEntries(fd.entries());
- const txt=`[홈페이지 문의]\n이름: ${o.name}\n연락처: ${o.phone}\n종류: ${o.type}\n희망일: ${o.date}\n지역/단지: ${o.area}\n평형: ${o.size}\n내용: ${o.msg}`;const btn=f.querySelector('button[type=submit]');btn.disabled=true;btn.textContent='보내는 중…';
- try{const r=await fetch('https://formsubmit.co/ajax/nowclean0122@gmail.com',{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({_subject:`[나우클린 홈페이지 문의] ${o.type} · ${o.name}`,_template:'table',_captcha:'false','이름':o.name,'연락처':o.phone,'청소 종류':o.type,'희망 날짜':o.date,'지역·단지':o.area,'평형':o.size,'내용':o.msg})});const j=await r.json().catch(()=>({}));if(!r.ok||String(j.success)==='false')throw 0;f.style.display='none';document.querySelector('.ok').style.display='block'}
- catch(e){btn.disabled=false;btn.textContent='문의 보내기';if(confirm('메일 전송이 안 됐어요. 문자로 보낼까요?'))location.href='sms:01036745156?body='+encodeURIComponent(txt)}})}
+// 문의 → 손님 메일 앱에 받는 사람·제목·내용이 채워진 채로 열림(외부 전송 도구 없음). 메일 앱이 없으면 Gmail·문자·복사로
+const f=document.querySelector('form.q');if(f){f.addEventListener('submit',ev=>{ev.preventDefault();const o=Object.fromEntries(new FormData(f).entries());
+ const TO='nowclean0122@gmail.com',sub=`[나우클린 홈페이지 문의] ${o.type} · ${o.name}`;
+ const txt=`[홈페이지 문의]
+이름: ${o.name}
+연락처: ${o.phone}
+청소 종류: ${o.type}
+희망 날짜: ${o.date||'-'}
+지역·단지: ${o.area||'-'}
+평형: ${o.size||'-'}
+내용: ${o.msg||'-'}`;
+ const mail='mailto:'+TO+'?subject='+encodeURIComponent(sub)+'&body='+encodeURIComponent(txt);
+ const gm='https://mail.google.com/mail/?view=cm&fs=1&to='+TO+'&su='+encodeURIComponent(sub)+'&body='+encodeURIComponent(txt);
+ const sms='sms:01036745156'+(/iPhone|iPad/.test(navigator.userAgent)?'&':'?')+'body='+encodeURIComponent(txt);
+ const ok=document.querySelector('.ok');ok.innerHTML='<b>메일 앱이 열렸어요 — [보내기]만 누르면 접수돼요.</b><br>안 열렸거나 메일 앱이 없으면 아래 중 편한 걸로 보내 주세요.'+
+  '<div class="okb"><a class="btn o" href="'+mail+'">메일 앱으로 보내기</a><a class="btn o" target="_blank" rel="noopener" href="'+gm+'">Gmail로 보내기</a><a class="btn o" href="'+sms+'">문자로 보내기</a><button type="button" class="btn o cp">내용 복사</button></div>';
+ ok.style.display='block';ok.querySelector('.cp').onclick=e=>{navigator.clipboard.writeText(TO+'
+'+sub+'
+
+'+txt).then(()=>e.target.textContent='복사됨 ✓')};
+ location.href=mail})}
