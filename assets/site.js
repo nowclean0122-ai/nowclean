@@ -1,0 +1,6 @@
+document.querySelectorAll('.gal a').forEach(a=>a.addEventListener('click',ev=>{ev.preventDefault();const b=document.createElement('div');b.className='lb';b.style.display='flex';b.innerHTML='<img src="'+a.getAttribute('href')+'">';b.onclick=()=>b.remove();document.body.appendChild(b)}));
+document.querySelectorAll('.filter button').forEach(bt=>bt.addEventListener('click',()=>{document.querySelectorAll('.filter button').forEach(x=>x.classList.remove('on'));bt.classList.add('on');const k=bt.dataset.k;document.querySelectorAll('[data-kind]').forEach(c=>c.style.display=(k==='all'||c.dataset.kind===k)?'':'none')}));
+const f=document.querySelector('form.q');if(f){f.addEventListener('submit',async ev=>{ev.preventDefault();const fd=new FormData(f);const cfg=window.NC_FORM||{};
+ const txt=`[홈페이지 문의]\n이름: ${fd.get('name')}\n연락처: ${fd.get('phone')}\n종류: ${fd.get('type')}\n희망일: ${fd.get('date')}\n지역/단지: ${fd.get('area')}\n평형: ${fd.get('size')}\n내용: ${fd.get('msg')}`;
+ if(cfg.action){const body=new URLSearchParams();for(const [k,v] of Object.entries(cfg.entries))body.append(v,fd.get(k)||'');try{await fetch(cfg.action,{method:'POST',mode:'no-cors',body})}catch(e){}f.style.display='none';document.querySelector('.ok').style.display='block';}
+ else{location.href='sms:01036745156?body='+encodeURIComponent(txt);}})}
