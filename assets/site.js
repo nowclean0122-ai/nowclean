@@ -34,8 +34,5 @@ const f=document.querySelector('form.q');if(f){f.addEventListener('submit',ev=>{
  const sms='sms:01036745156'+(/iPhone|iPad/.test(navigator.userAgent)?'&':'?')+'body='+encodeURIComponent(txt);
  const ok=document.querySelector('.ok');ok.innerHTML='<b>메일 앱이 열렸어요 — [보내기]만 누르면 접수돼요.</b><br>안 열렸거나 메일 앱이 없으면 아래 중 편한 걸로 보내 주세요.'+
   '<div class="okb"><a class="btn o" href="'+mail+'">메일 앱으로 보내기</a><a class="btn o" target="_blank" rel="noopener" href="'+gm+'">Gmail로 보내기</a><a class="btn o" href="'+sms+'">문자로 보내기</a><button type="button" class="btn o cp">내용 복사</button></div>';
- ok.style.display='block';ok.querySelector('.cp').onclick=e=>{navigator.clipboard.writeText(TO+'
-'+sub+'
-
-'+txt).then(()=>e.target.textContent='복사됨 ✓')};
+ ok.style.display='block';ok.querySelector('.cp').onclick=e=>{navigator.clipboard.writeText(TO+'\n'+sub+'\n\n'+txt).then(()=>e.target.textContent='복사됨 ✓')};
  location.href=mail})}
