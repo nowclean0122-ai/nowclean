@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>견적서 만들기 | 나우클린</title>
+<style>
+body{margin:0;font-family:Pretendard,'Malgun Gothic',sans-serif;background:#f3f6fa;color:#16202c}
+.w{max-width:520px;margin:0 auto;padding:16px}
+h1{font-size:20px;margin:6px 0 4px}.s{color:#5b6573;font-size:13.5px;margin:0 0 12px}
+.g{background:#fff;border:1px solid #e6e8ec;border-radius:14px;padding:12px 14px;margin:10px 0}
+.g>b{display:block;font-size:14px;margin-bottom:6px}
+.c{display:flex;flex-wrap:wrap;gap:6px}.c button{font:inherit;font-size:15px;padding:9px 13px;border:1px solid #e6e8ec;border-radius:20px;background:#fff;color:#16202c}
+.c button.on{background:#102a44;color:#fff;border-color:#102a44}
+input{font:inherit;width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #e6e8ec;border-radius:10px;margin:3px 0}
+.r{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+canvas{width:100%;border-radius:12px;box-shadow:0 6px 24px rgba(16,42,68,.12);margin-top:10px;background:#fff}
+.bt{display:flex;gap:8px;margin:12px 0 30px}.bt button{flex:1;font:inherit;font-weight:700;font-size:16px;padding:14px;border:0;border-radius:12px;background:#102a44;color:#fff}.bt button.y{background:#fee500;color:#191919}
+.warn{background:#fff7e6;border:1px solid #ffd58a;border-radius:10px;padding:10px 12px;font-size:13.5px;margin:10px 0}
+</style></head><body><div class="w">
+<h1>🧾 견적서 만들기</h1><p class="s">대표님용 · 고르면 아래에 견적서 그림이 바로 생겨요 → [보내기]로 카카오톡·당근·문자에 그대로 전송</p>
+<div id="nop" class="warn" style="display:none">⚠️ 아직 평형별 가격이 안 정해져서 금액 칸이 “상담 후 안내”로 나와요. 가격을 정해 Claude에게 알려주시면 자동으로 채워져요. 아래 ‘직접 입력’ 칸에 적으면 그 금액으로 나가요.</div>
+<div class="g"><b>청소 종류</b><div class="c" data-k="kind"></div></div>
+<div class="g"><b>평형 (전용면적 기준)</b><div class="c" data-k="size"></div></div>
+<div class="g"><b>집 상태</b><div class="c" data-k="state"></div></div>
+<div class="g"><b>고객·현장</b><input id="apt" placeholder="단지명 (예: 더샵탕정 1차 84A)"><div class="r"><input id="date" placeholder="날짜 (예: 12/14 토)"><input id="name" placeholder="고객님 성함(선택)"></div></div>
+<div class="g"><b>금액 직접 입력 (비우면 가격표대로)</b><div class="r"><input id="lo" inputmode="numeric" placeholder="최소 (만 원)"><input id="hi" inputmode="numeric" placeholder="최대 (만 원)"></div><input id="memo" placeholder="한 줄 메모 (예: 베란다 확장형 · 방 3 · 욕실 2)"></div>
+<canvas id="cv" width="1080" height="1500"></canvas>
+<div class="bt"><button class="y" id="share">📤 보내기</button><button id="save">💾 사진 저장</button></div>
+</div>
+<script>
+const P={};
+const OPT={kind:['입주청소','이사청소','상가청소','원룸청소'],size:['10평대','20평대','30평대','40평대','50평 이상'],state:['신축','구축','인테리어 후']};
+const S={kind:'입주청소',size:'30평대',state:'신축'};
+document.querySelectorAll('.c').forEach(g=>{const k=g.dataset.k;g.innerHTML=OPT[k].map(o=>`<button class="${S[k]===o?'on':''}">${o}</button>`).join('');
+ g.onclick=e=>{const b=e.target.closest('button');if(!b)return;S[k]=b.textContent;g.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));draw()}});
+['apt','date','name','lo','hi','memo'].forEach(i=>document.getElementById(i).oninput=draw);
+const v=i=>document.getElementById(i).value.trim();
+function price(){const lo=v('lo'),hi=v('hi');if(lo)return hi&&hi!==lo?`${lo}만 ~ ${hi}만 원`:`${lo}만 원`;
+ const t=(P[S.kind]||{})[S.size];if(t&&t[0])return t[1]&&t[1]!==t[0]?`${t[0]}만 ~ ${t[1]}만 원`:`${t[0]}만 원`;return '';}
+function wrap(c,t,x,y,w,lh){let line='';for(const ch of t){if(c.measureText(line+ch).width>w){c.fillText(line,x,y);line=ch;y+=lh}else line+=ch}c.fillText(line,x,y);return y+lh}
+function draw(){const c=document.getElementById('cv').getContext('2d'),W=1080,F='"Pretendard","Malgun Gothic","Apple SD Gothic Neo",sans-serif';
+ document.getElementById('nop').style.display=Object.keys(P).length?'none':'';
+ c.fillStyle='#fff';c.fillRect(0,0,W,1500);c.fillStyle='#102a44';c.fillRect(0,0,W,210);
+ c.fillStyle='#fff';c.font=`900 58px ${F}`;c.fillText('NOW CLEAN',70,105);c.font=`500 34px ${F}`;c.fillStyle='#c9d1db';c.fillText('나우클린 · 천안·아산 입주청소',70,160);
+ c.fillStyle='#5eead4';c.font=`800 44px ${F}`;c.textAlign='right';c.fillText('견적서',W-70,120);c.textAlign='left';
+ let y=290;c.fillStyle='#16202c';c.font=`800 46px ${F}`;y=wrap(c,(v('apt')||'고객님 댁')+(v('name')?` · ${v('name')} 고객님`:''),70,y,W-140,58);
+ c.font=`500 34px ${F}`;c.fillStyle='#5b6573';c.fillText([S.kind,S.size,S.state,v('date')].filter(Boolean).join('  ·  '),70,y+6);y+=70;
+ c.fillStyle='#f3f6fa';c.fillRect(70,y,W-140,170);c.fillStyle='#5b6573';c.font=`600 30px ${F}`;c.fillText('예상 금액',100,y+55);
+ const pr=price();c.fillStyle='#102a44';c.font=`900 ${pr?64:46}px ${F}`;c.fillText(pr||'상담 후 안내드려요',100,y+135);y+=215;
+ if(v('memo')){c.fillStyle='#0d9488';c.font=`600 32px ${F}`;y=wrap(c,'📝 '+v('memo'),70,y,W-140,44)+30}
+ const sec=(t,items,col)=>{c.fillStyle=col;c.font=`800 36px ${F}`;c.fillText(t,70,y);y+=52;c.font=`500 31px ${F}`;c.fillStyle='#16202c';items.forEach(s=>{y=wrap(c,'· '+s,80,y,W-160,44)});y+=18};
+ sec('기본 범위',['현관·신발장, 주방 상·하부장 안팎·후드·배수구','욕실 전체(천장·벽·바닥·환풍기·배수구)','방·거실 창틀·바닥·몰딩·콘센트, 베란다'],'#102a44');
+ sec('기본 범위 밖 (원하시면 따로)',['외창, 가전·가구 안쪽, 짐이 있는 상태의 작업','인테리어 분진이 아주 많을 때는 작업 전에 먼저 말씀드려요'],'#9a6700');
+ sec('나우클린 약속',['상담한 나우클린 팀이 직접 가요 (다른 업체에 넘기지 않아요)','기본 범위 밖은 작업 전에 먼저 말씀드리고, 동의 없이 추가 비용 없어요','끝나면 현장에서 같이 검수하고, 미흡한 곳은 바로 처리해요'],'#0d9488');
+ c.fillStyle='#102a44';c.fillRect(0,1500-150,W,150);c.fillStyle='#fff';c.font=`800 40px ${F}`;c.fillText('📞 010-3674-5156',70,1500-82);
+ c.font=`500 28px ${F}`;c.fillStyle='#c9d1db';const d=new Date();c.fillText(`작성 ${d.getMonth()+1}/${d.getDate()} · 현장 상태에 따라 조금 달라질 수 있어요`,70,1500-36);c.textAlign='right';c.font=`600 30px ${F}`;c.fillStyle='#fee500';c.fillText('카카오톡·당근 ‘나우클린’',W-70,1500-82);c.textAlign='left';}
+function blob(){return new Promise(r=>document.getElementById('cv').toBlob(r,'image/jpeg',.92))}
+document.getElementById('share').onclick=async()=>{const b=await blob(),f=new File([b],'나우클린_견적서.jpg',{type:'image/jpeg'});
+ if(navigator.canShare&&navigator.canShare({files:[f]}))try{await navigator.share({files:[f],title:'나우클린 견적서'})}catch(e){}else document.getElementById('save').click()};
+document.getElementById('save').onclick=async()=>{const b=await blob(),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='나우클린_견적서.jpg';a.click()};
+(document.fonts?document.fonts.ready:Promise.resolve()).then(draw);draw();
+</script></body></html>
